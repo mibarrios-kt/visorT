@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Responsive meta tag -->
+    <title>Geovisor AGUA</title>
+    
+    <!-- Estilos de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/customize.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+       
+    </style>
+</head>
+<body>
+<script src="menu1.js"></script>
+
+
+<div id="header">
+    <div class="header-row">
+        <a href="https://waterlab.com.co/" target="_blank" rel="noopener">
+            <img class="header-logo" src="logos/Logo_Waterlab_en_w.svg" alt="Logo Waterlab">
+        </a>
+        <span class="header-title">Centro de Monitoreo del Agua - Tolima</span>
+        <button class="nav-btn nav-hamburger" id="btn-hamburger" aria-label="Abrir menú">
+            &#9776;
+        </button>
+        <nav class="header-nav">
+            <button class="nav-btn" id="btn-capas">Capas</button>
+            <div id="menu-capas" class="menu-capas" style="display:none;">
+                <div class="menu-section">
+                    <div class="menu-section-title collapsible">Hidrografía</div>
+                    <div class="menu-section-content">
+                        <label><input type="checkbox" id="chk-unidades-hidro">Unidades hidrológicas</label>
+                        <label><input type="checkbox" id="chk-subzonas"> Subzonas Hidrográficas</label>
+                        <label><input type="checkbox" id="chk-drenajes"> Drenajes</label>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title collapsible">Entes Territoriales</div>
+                    <div class="menu-section-content">
+                        <label><input type="checkbox" id="chk-municipios"> Municipios</label>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title collapsible">Condiciones Hidroclimáticas</div>
+                    <div class="menu-section-content">
+                        <label><input type="checkbox" id="chk-precip-nc"> Precipitación (1km)</label>
+                        <label><input type="checkbox" id="chk-temp-nc"> Temperatura (1km)</label>
+                        <label><input type="checkbox" id="chk-escorr"> Escorrentía</label>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title collapsible">Condiciones Meteorológicas</div>
+                    <div class="menu-section-content">
+                        <label><input type="checkbox" id="chk-precip-ideam"> Precipitación día actual (IDEAM)</label>
+                        <label><input type="checkbox" id="chk-tmax-ideam"> Temp. máx. día actual (IDEAM)</label>
+                        <label><input type="checkbox" id="chk-pronostico-ideam"> Pronóstico Prec. - 24 H (IDEAM)</label>
+                        <label><input type="checkbox" id="chk-GOES13"> GOES Banda 13</label>
+                        <!-- <label><input type="checkbox" id="chk-ERR"> Precipitación (ERR-NOAA)</label> -->
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title collapsible">Estaciones de CORTOLIMA</div>
+                    <div class="menu-section-content">
+                        <label><input type="checkbox" id="chk-est-met"> Meteorológicas</label>
+                        <label><input type="checkbox" id="chk-est-hidro"> Hidrométricas</label>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title collapsible">Estaciones de IDEAM</div>
+                    <div class="menu-section-content">
+                        <label><input type="checkbox" id="chk-est-hidro-ideam"> Limnimétricas</label>
+                    </div>
+                </div>
+            </div>
+            <!-- <button class="nav-btn" id="btn-indicadores">Indicadores</button> -->
+            <button class="nav-btn" id="btn-leyenda">Leyenda</button>
+            <button class="nav-btn" id="btn-info-general">Info. General</button>
+        </nav>
+    </div>
+    <div class="header-title-row">
+    </div>
+    
+</div>
+    <div id="map"></div>
+    <div id="lateral-panel"></div>
+
+    <!-- Scripts necesarios -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@3.0.11/dist/esri-leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+
+    <!-- script leaflet-->
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+
+
+    <!-- <script src="script.js"></script> --> 
+     <script src="info_proyecto.js"></script>
+    <script src="leyenda.js"></script>
+    <script src="goes13-anim.js"></script>
+     <script src="script_v2.js"></script>
+
+    <script src="menu2.js"></script>
+<div id="footer">
+    <div class="footer-logos">
+        <a href="https://tolima.gov.co/secretarias/secretaria-del-ambiente-y-gestion-del-riesgo" target="_blank" rel="noopener">
+            <img src="logos/GobernacionTolima.png" alt="Logo Gobernación del Tolima">
+        </a>
+        <a href="https://cortolima.gov.co/" target="_blank" rel="noopener">
+            <img src="logos/logoCortolima.png" alt="Logo CORTOLIMA">
+        </a>
+        <a href="https://ut.edu.co/" target="_blank" rel="noopener">
+            <img src="logos/logoUT.png" alt="Logo Universidad del Tolima">
+        </a>
+        <a href="https://www.sgr.gov.co/" target="_blank" rel="noopener">
+            <img src="logos/LogoSGR.png" alt="Logo SGR">
+        </a>
+    </div>
+</div>
+</body>
+</html>

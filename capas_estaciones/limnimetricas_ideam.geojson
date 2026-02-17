@@ -1,0 +1,258 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.89,
+          5.018611111111111
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "PTE SAN FRANCISCO [21257070]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 260,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 341.902560224,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Lagunilla y Otros Directos al Magdalena",
+        "Corriente_hídrica": "Sabandija",
+        "Municipio": "Armero",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021257070.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.97194444444445,
+          4.795555555555556
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "NUEVA LA [21257100]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 470,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 647.902630764,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Lagunilla y Otros Directos al Magdalena",
+        "Corriente_hídrica": "Recio",
+        "Municipio": "Lérida",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021257100.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83805555555556,
+          4.387777777777778
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "NARIÑO AUTOM [21237010]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 251.79,
+        "Cota cero (msnm)": 240.11,
+        "Área aferente (km2)": 48130.1871468,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "NA",
+        "Corriente_hídrica": "Magdalena",
+        "Municipio": "Nariño",
+        "Departamento": "Cundinamarca",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021237010.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.28583333333333,
+          4.481944444444444
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "MONTEZUMA [21217180]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 1450,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 171.875004255,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Coello",
+        "Corriente_hídrica": "Combeima",
+        "Municipio": "Ibagué",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021217180.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.2925,
+          4.402777777777779
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "PTE CARRETERA [21217120]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 1220,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 796.854730987,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Coello",
+        "Corriente_hídrica": "Coello",
+        "Municipio": "Ibagué",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021217120.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.60833333333333,
+          4.024166666666667
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "DIAMANTE EL [22077030]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 1769,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 231.318491448,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Cucuana",
+        "Corriente_hídrica": "Cucuana",
+        "Municipio": "Roncesvalles",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0022077030.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.93555555555555,
+          3.8494444444444444
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "PURIFICACION AUTOM [21137010]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 291.249,
+        "Cota cero (msnm)": 281.073,
+        "Área aferente (km2)": 25504.9233658,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "NA",
+        "Corriente_hídrica": "Magdalena",
+        "Municipio": "Purificación",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021137010.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.68805555555556,
+          4.059166666666666
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "PTE CUNDAY [21167050]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 470,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 149.054918721,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Prado",
+        "Corriente_hídrica": "Prado",
+        "Municipio": "Cunday",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021167050.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.65666666666667,
+          3.926388888888889
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "SAN PABLO TOLIMA [21167060]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 640,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 201.478721869,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Prado",
+        "Corriente_hídrica": "Cuinde",
+        "Municipio": "Villarica",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021167060.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.82638888888889,
+          3.725277777777778
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "LA MORA AUTOM [21167080]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 1425,
+        "Cota cero (msnm)": 406,
+        "Área aferente (km2)": 439.692397327,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Río Prado",
+        "Corriente_hídrica": "Negro",
+        "Municipio": "Prado",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0021167080.json"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.6863888888889,
+          3.4383333333333335
+        ]
+      },
+      "properties": {
+        "Nombre_estación": "SARDINAS LAS [22017020]",
+        "Tipo": "Limnigráfica",
+        "Altitud (msnm)": 1190,
+        "Cota cero (msnm)": 0,
+        "Área aferente (km2)": 1627.05516865,
+        "Zona Hidrográfica": "Alto Magdalena",
+        "Subzona Hidrográfica": "Alto Saldaña",
+        "Corriente_hídrica": "Saldaña",
+        "Municipio": "Rioblanco",
+        "Departamento": "Tolima",
+	"source": "https://fews.ideam.gov.co/visorfews/data/series/jsonH/0022017020.json"
+      }
+    }
+  ]
+}
