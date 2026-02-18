@@ -4,6 +4,9 @@ dist/
 # IDE
 .vscode/
 
+# Documentación del proyecto
+docs_manual/
+
 # Carpetas de datos
 datos_coello/
 lambda-ideam-proxy/
