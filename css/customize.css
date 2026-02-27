@@ -15,7 +15,7 @@ h1 {
     box-sizing: border-box;
     width: 100%;
     position: relative;
-    z-index: 100;
+    z-index: 2000;
     min-height: 60px;
     display: flex;
     flex-direction: column;
@@ -27,11 +27,23 @@ h1 {
     align-items: center;
     width: 100%;
 }
+.header-logos-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
 .header-logo {
-    height: 48px;
+    height: 36px;
     width: auto;
     margin: 0;
     display: block;
+}
+.header-logo-cortolima {
+    height: 58px;
+    background: #fff;
+    padding: 3px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-nav {
@@ -106,8 +118,47 @@ h1 {
         margin-left: 8px;
     }
     .header-logo {
+        max-width: 65px;
+        height: auto;
+    }
+    .header-logo-cortolima {
         max-width: 90px;
         height: auto;
+        padding: 2px 8px;
+    }
+    .header-logos-container {
+        gap: 8px;
+    }
+}
+
+/* Ocultar título en móviles con orientación vertical */
+@media (max-width: 700px) and (orientation: portrait) {
+    .header-title {
+        display: none !important;
+    }
+    .header-row {
+        position: relative;
+        justify-content: flex-start !important;
+    }
+    /* Posicionar el botón hamburguesa en la derecha */
+    .nav-hamburger {
+        position: absolute !important;
+        right: 8px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+    /* El nav no debe ocupar espacio visible en el header-row */
+    .header-nav {
+        width: 0 !important;
+        height: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+    /* Ocultar los botones del nav (pero no afectar el menu-capas) */
+    .header-nav > .nav-btn {
+        display: none !important;
     }
 }
 
@@ -163,10 +214,18 @@ h1 {
         align-items: center;
         gap: 10px; /* Espacio entre logo, título y hamburguesa */
     }
+    .header-logos-container {
+        gap: 10px;
+    }
     .header-logo {
-        height: 40px;
+        height: 30px;
+        max-width: 90px;
+        margin-bottom: 4px;
+    }
+    .header-logo-cortolima {
+        height: 50px;
         max-width: 120px;
-                margin-bottom: 4px;
+        padding: 2px 8px;
     }
     .nav-hamburger {
         align-items: center;
@@ -205,9 +264,16 @@ h1 {
         width: 100%;
         gap: 24px;
     }
+    .header-logos-container {
+        gap: 16px;
+    }
     .header-logo {
-        height: 48px;
-        max-width: 160px;
+        height: 36px;
+        max-width: 130px;
+    }
+    .header-logo-cortolima {
+        height: 58px;
+        padding: 3px 10px;
     }
     .header-title {
         flex: 1 1 auto;

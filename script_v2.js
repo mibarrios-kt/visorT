@@ -1648,8 +1648,18 @@ function adjustLayout() {
     // Detecta orientación vertical (retrato)
     const isPortrait = window.innerHeight >= window.innerWidth;
 
+    // Resetear todas las propiedades de posicionamiento antes de aplicar los nuevos estilos
+    // Esto previene conflictos cuando se cambia entre vistas en DevTools
+    lateralPanel.style.removeProperty('top');
+    lateralPanel.style.removeProperty('bottom');
+    lateralPanel.style.removeProperty('left');
+    lateralPanel.style.removeProperty('right');
+    lateralPanel.style.removeProperty('width');
+    lateralPanel.style.removeProperty('height');
+    lateralPanel.style.removeProperty('max-height');
+
     if (isPortrait) {
-        // Panel abajo, ocupa 40% de alto
+        // Panel abajo, ocupa 40% de alto (se superpone al footer)
         lateralPanel.style.position = 'fixed';
         lateralPanel.style.left = '0';
         lateralPanel.style.right = '0';
@@ -1658,18 +1668,18 @@ function adjustLayout() {
         lateralPanel.style.width = '100vw';
         lateralPanel.style.height = '40vh';
         lateralPanel.style.maxHeight = '60vh';
-        lateralPanel.style.zIndex = '2000';
+        lateralPanel.style.zIndex = '100';
         lateralPanel.style.borderLeft = 'none';
         lateralPanel.style.borderTop = '2px solid #bbb';
         lateralPanel.style.borderRight = 'none';
         lateralPanel.style.borderBottom = 'none';
-        lateralPanel.style.zIndex = '1'; // que sea menor que el menú nav
 
+        // El mapa NO resta footerHeight porque el panel se superpone al footer
         mapContainer.style.position = 'absolute';
         mapContainer.style.top = headerHeight + 'px';
         mapContainer.style.left = '0';
         mapContainer.style.width = '100vw';
-        mapContainer.style.height = `calc(100vh - ${headerHeight + footerHeight}px - 40vh)`;
+        mapContainer.style.height = `calc(100vh - ${headerHeight}px - 40vh)`;
     } else {
         // Panel lateral derecho, ocupa 33% de ancho y toda la altura entre header y footer
         lateralPanel.style.position = 'fixed';
@@ -1679,12 +1689,12 @@ function adjustLayout() {
         lateralPanel.style.left = 'auto';
         lateralPanel.style.width = '33vw';
         lateralPanel.style.height = `calc(100vh - ${headerHeight + footerHeight}px)`;
-        lateralPanel.style.zIndex = '2000';
+        lateralPanel.style.maxHeight = 'none';
+        lateralPanel.style.zIndex = '100';
         lateralPanel.style.borderLeft = '2px solid #bbb';
         lateralPanel.style.borderTop = 'none';
         lateralPanel.style.borderRight = 'none';
         lateralPanel.style.borderBottom = 'none';
-        lateralPanel.style.zIndex = '1'; // que sea menor que el menú nav
 
         mapContainer.style.position = 'absolute';
         mapContainer.style.top = headerHeight + 'px';
