@@ -94,10 +94,15 @@ const leyendasConfig = {
         ]
     },
     'chk-tmax-ideam': {
-        nombre: 'Temp. máx. día actual en °C (IDEAM)',
+        nombre: 'Temperatura dia actual (IDEAM)',
         items: [
-            { color: 'transparent', label: 'Leyenda dinámica del servicio IDEAM', tipo: 'texto',
-              descripcion: 'Esta capa muestra datos en tiempo real del IDEAM con su propia leyenda.' }
+            { color: 'rgb(115, 223, 255)', label: '≤ 15°C' },
+            { color: 'rgb(85, 255, 0)', label: '15 - 20°C' },
+            { color: 'rgb(38, 115, 0)', label: '20 - 25°C' },
+            { color: 'rgb(245, 245, 122)', label: '25 - 30°C' },
+            { color: 'rgb(230, 152, 0)', label: '30 - 35°C' },
+            { color: 'rgb(255, 127, 127)', label: '35 - 38°C' },
+            { color: 'rgb(230, 0, 0)', label: '> 38°C' }
         ]
     },
     'chk-pronostico-ideam': {
@@ -451,10 +456,10 @@ async function mostrarLeyendas() {
             if (legendData) {
                 crearLeyendaIdeamHTML(legendData, 'Pronóstico Precipitación 24H (IDEAM)', contenedorLeyendas, 11);
             }
-        } else if (capa.id === 'chk-tmax-ideam' && typeof identifyServiceUrl !== 'undefined' && identifyServiceUrl && identifyServiceUrl.includes('TMaxima_24H')) {
-            const legendData = await obtenerLeyendaIdeam('https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/TMaxima_24H/MapServer', 3);
+        } else if (capa.id === 'chk-tmax-ideam' && typeof identifyServiceUrl !== 'undefined' && identifyServiceUrl && identifyServiceUrl.includes('TMaxima')) {
+            const legendData = await obtenerLeyendaIdeam('https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/Datos_TMaxima/MapServer', 0);
             if (legendData) {
-                crearLeyendaIdeamHTML(legendData, 'Temperatura Máxima 24H (IDEAM)', contenedorLeyendas, 3);
+                crearLeyendaIdeamHTML(legendData, 'Temperatura dia actual (IDEAM)', contenedorLeyendas, 0);
             }
         } else if (capa.id === 'chk-precip-ideam' && typeof identifyServiceUrl !== 'undefined' && identifyServiceUrl && identifyServiceUrl.includes('Precipitacion__Acumulada')) {
             const legendData = await obtenerLeyendaIdeam('https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/Precipitacion__Acumulada/MapServer', 4);

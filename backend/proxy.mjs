@@ -1,6 +1,11 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import https from 'https';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -12,6 +17,9 @@ app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     next();
 });
+
+// Servir archivos estáticos desde el directorio raíz del proyecto
+app.use(express.static(path.join(__dirname, '..')));
 
 app.get('/proxy', async (req, res) => {
     const url = req.query.url;

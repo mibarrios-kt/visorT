@@ -1,5 +1,6 @@
 # Carpetas de build
 dist/
+dist-2/
 
 # IDE
 .vscode/
@@ -10,6 +11,7 @@ docs_manual/
 # Carpetas de datos
 datos_coello/
 lambda-ideam-proxy/
+hidromet_estaciones/
 
 # Archivos borradores
 codigo-para-capa-estaciones-hidrom-version1-con-grafica.txt 

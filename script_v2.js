@@ -183,11 +183,14 @@ document.getElementById('chk-precip-ideam').addEventListener('change', function(
 document.getElementById('chk-tmax-ideam').addEventListener('change', function(e) {
     if (this.checked) {
         capaTmaxIdeam = L.esri.dynamicMapLayer({
-            url: 'https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/TMaxima_24H/MapServer',
+            //url: 'https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/TMaxima_24H/MapServer',
+            url: 'https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/Datos_TMaxima/MapServer',
+            layers: [0],
             opacity: 0.7
         }).addTo(map);
-        identifyServiceUrl = 'https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/TMaxima_24H/MapServer';
-        
+        //identifyServiceUrl = 'https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/TMaxima_24H/MapServer';
+        identifyServiceUrl = 'https://visualizador.ideam.gov.co/gisserver/rest/services/StoryMaps_IDA/Datos_TMaxima/MapServer';
+                
         // Agregar a servicios activos
         if (!serviciosIdeamActivos.includes('temperatura')) {
             serviciosIdeamActivos.push('temperatura');
@@ -359,9 +362,16 @@ document.getElementById('chk-GOES13').addEventListener('change', async function(
 map.on('click', function(e) {
     if (!identifyServiceUrl) return; // No hay capa activa para identificar
 
-    L.esri.identifyFeatures({
+    let identifyQuery = L.esri.identifyFeatures({
         url: identifyServiceUrl
-    })
+    });
+    
+    // Especificar la capa para temperatura (capa 0)
+    if (identifyServiceUrl.includes('TMaxima')) {
+        identifyQuery.layers([0]);
+    }
+    
+    identifyQuery
     .on(map)
     .at(e.latlng)
     .run(function(error, featureCollection) {
@@ -372,47 +382,47 @@ map.on('click', function(e) {
         if (featureCollection.features.length) {
             var props = featureCollection.features[0].properties;
             let titulo = '';
-            let pixelLabel = '';
-            let classLabel = '';
-            let pixelValue = '';
-            let classValue = '';
+            let html = '';
 
             // Detecta el servicio activo y personaliza los textos
             if (identifyServiceUrl.includes('Pronostico_24_horas')) {
                 titulo = 'Pronóstico de Precipitación 24H';
-                pixelLabel = 'Valor:';
-                classLabel = 'Categoría:';
-                pixelValue = props['Classify.Pixel Value'] !== undefined
+                let pixelValue = props['Classify.Pixel Value'] !== undefined
                     ? `${Number(props['Classify.Pixel Value']).toFixed(1)} mm`
                     : 'N/A';
-                classValue = props['Classify.Class value'] !== undefined
+                let classValue = props['Classify.Class value'] !== undefined
                     ? props['Classify.Class value']
                     : 'N/A';
-            } else if (identifyServiceUrl.includes('TMaxima_24H')) {
-                titulo = 'Temperatura Max 24H';
-                pixelLabel = 'Valor:';
-                classLabel = 'Categoría:';
-                pixelValue = props['Classify.Pixel Value'] !== undefined
-                    ? `${Number(props['Classify.Pixel Value']).toFixed(1)} °C`
+                html = `<b>${titulo}</b><br>
+                        <b>Valor:</b> ${pixelValue}<br>
+                        <b>Categoría:</b> ${classValue}`;
+            } else if (identifyServiceUrl.includes('TMaxima')) {
+                // Servicio de puntos (estaciones meteorológicas)
+                titulo = 'Temperatura dia actual (IDEAM)';
+                let estacion = props['ESTACION'] || 'N/A';
+                let municipio = props['MUNICIPIO'] || 'N/A';
+                let temperatura = props['DATO'] !== undefined
+                    ? `${Number(props['DATO']).toFixed(1)} °C`
                     : 'N/A';
-                classValue = props['Classify.Class value'] !== undefined
-                    ? props['Classify.Class value']
-                    : 'N/A';
+                let fecha = props['MAX_FECHA'] || 'N/A';
+                html = `<b>${titulo}</b><br>
+                        <b>Estación:</b> ${estacion}<br>
+                        <b>Municipio:</b> ${municipio}<br>
+                        <b>Temperatura:</b> ${temperatura}<br>
+                        <b>Fecha:</b> ${fecha}`;
             } else {
+                // Servicio de precipitación (raster)
                 titulo = 'Precipitación ultimas 24H (IDEAM)';
-                pixelLabel = 'Valor:';
-                classLabel = 'Categoría:';
-                pixelValue = props['Classify.Pixel Value'] !== undefined
+                let pixelValue = props['Classify.Pixel Value'] !== undefined
                     ? `${Number(props['Classify.Pixel Value']).toFixed(1)} mm`
                     : 'N/A';
-                classValue = props['Classify.Class value'] !== undefined
+                let classValue = props['Classify.Class value'] !== undefined
                     ? props['Classify.Class value']
                     : 'N/A';
+                html = `<b>${titulo}</b><br>
+                        <b>Valor:</b> ${pixelValue}<br>
+                        <b>Categoría:</b> ${classValue}`;
             }
-
-            var html = `<b>${titulo}</b><br>
-                        <b>${pixelLabel}</b> ${pixelValue}<br>
-                        <b>${classLabel}</b> ${classValue}`;
 
             L.popup()
                 .setLatLng(e.latlng)
@@ -447,16 +457,67 @@ document.getElementById('chk-est-met').addEventListener('change', function(e) {
                     onEachFeature: function(feature, layer) {
                         let props = feature.properties;
                         let coords = feature.geometry.coordinates;
+                        let codigo = props["OBJECTID_1"] || null;
+                        let nombre = props["Nombre_estación"] || 'N/A';
+                        let municipio = props["Municipio"] || 'N/A';
+                        
                         let popupContent = `
-                            <b>Nombre:</b> ${props["Nombre_estación"] || 'N/A'}<br>
-                            <b>Municipio:</b> ${props["Municipio"] || 'N/A'}<br>
-                            <b>Tipo:</b> Meteorológica<br>
-                            <b>Corriente hídrica:</b> ${props["Corriente_hídrica"] || 'N/A'}<br>
-                            <b>Coordenadas:</b> [${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}]
+                            <div style="min-width:280px;">
+                                <b>Nombre:</b> ${nombre}<br>
+                                <b>Municipio:</b> ${municipio}<br>
+                                <b>Tipo:</b> Meteorológica<br>
+                                <b>Corriente hídrica:</b> ${props["Corriente_hídrica"] || 'N/A'}<br>
+                                <b>Coordenadas:</b> [${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}]
+                                ${codigo ? `
+                                <hr style="margin:10px 0;">
+                                <div style="margin-top:8px;">
+                                    <label style="font-size:12px;display:block;margin-bottom:4px;">Fecha desde:</label>
+                                    <input type="date" id="fecha-desde-${codigo}" style="width:100%;padding:4px;font-size:12px;margin-bottom:6px;">
+                                    <label style="font-size:12px;display:block;margin-bottom:4px;">Fecha hasta:</label>
+                                    <input type="date" id="fecha-hasta-${codigo}" style="width:100%;padding:4px;font-size:12px;margin-bottom:8px;">
+                                    <div style="display:flex;gap:6px;">
+                                        <button id="btn-grafica-${codigo}" style="flex:1;padding:6px;font-size:12px;cursor:pointer;">📊 Ver Gráfica</button>
+                                        <button id="btn-descargar-${codigo}" style="flex:1;padding:6px;font-size:12px;cursor:pointer;">💾 Descargar</button>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
                         `;
-                        layer.bindPopup(popupContent);
+                        
+                        let popup = L.popup({ maxWidth: 320 }).setContent(popupContent);
+                        layer.bindPopup(popup);
+                        
+                        // Cuando se abre el popup, configurar eventos de botones
+                        if (codigo) {
+                            layer.on('popupopen', function() {
+                                // Configurar fechas por defecto (últimos 30 días)
+                                let hoy = new Date();
+                                let hace30dias = new Date();
+                                hace30dias.setDate(hace30dias.getDate() - 30);
+                                document.getElementById(`fecha-desde-${codigo}`).value = hace30dias.toISOString().split('T')[0];
+                                document.getElementById(`fecha-hasta-${codigo}`).value = hoy.toISOString().split('T')[0];
+                                
+                                // Botón Ver Gráfica
+                                document.getElementById(`btn-grafica-${codigo}`).onclick = function() {
+                                    let fechaDesde = document.getElementById(`fecha-desde-${codigo}`).value;
+                                    let fechaHasta = document.getElementById(`fecha-hasta-${codigo}`).value;
+                                    mostrarGraficaMeteorologica(codigo, nombre, municipio, fechaDesde, fechaHasta);
+                                };
+                                
+                                // Botón Descargar
+                                document.getElementById(`btn-descargar-${codigo}`).onclick = function() {
+                                    let fechaDesde = document.getElementById(`fecha-desde-${codigo}`).value;
+                                    let fechaHasta = document.getElementById(`fecha-hasta-${codigo}`).value;
+                                    descargarDatosMeteorologicos(codigo, nombre, fechaDesde, fechaHasta);
+                                };
+                            });
+                        }
                     }
                 }).addTo(map);
+            })
+            .catch(err => {
+                console.error('Error cargando estaciones meteorológicas:', err);
+                alert('Error al cargar estaciones meteorológicas: ' + err.message);
             });
     } else {
         if (capaEstMet) {
@@ -530,6 +591,10 @@ document.getElementById('chk-est-hidro').addEventListener('change', function(e) 
                         });
                     }
                 }).addTo(map);
+            })
+            .catch(err => {
+                console.error('Error cargando estaciones hidrométricas:', err);
+                alert('Error al cargar estaciones hidrométricas: ' + err.message);
             });
     } else {
         if (capaEstHidro) {
@@ -860,6 +925,239 @@ fetch('tus_datos.json')
     });
 
 // cargar excel indicadores
+// ===== Funciones para Estaciones Meteorológicas CORTOLIMA =====
+
+function mostrarGraficaMeteorologica(codigo, nombre, municipio, fechaDesde, fechaHasta) {
+    // Cargar índice de archivos para obtener el nombre exacto del archivo
+    fetch('/hidromet_estaciones/index.json')
+        .then(resp => resp.json())
+        .then(index => {
+            // Buscar el archivo correspondiente al código
+            if (!index[codigo]) {
+                throw new Error(`No se encontró archivo para la estación ${codigo}`);
+            }
+            return fetch(`/hidromet_estaciones/${index[codigo]}`);
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al cargar archivo de datos');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            // Filtrar datos por rango de fechas
+            let datosFiltrados = data.datos.filter(d => {
+                let fecha = d.fecha.split(' ')[0]; // Tomar solo la parte de fecha (YYYY-MM-DD)
+                return (!fechaDesde || fecha >= fechaDesde) && (!fechaHasta || fecha <= fechaHasta);
+            });
+            
+            if (datosFiltrados.length === 0) {
+                alert('No hay datos en el rango de fechas seleccionado');
+                return;
+            }
+            
+            // Preparar trazas para Plotly
+            let fechas = datosFiltrados.map(d => d.fecha);
+            
+            let trazas = [];
+            
+            // Temperatura (eje Y1)
+            if (data.variables.includes('Temperatura')) {
+                trazas.push({
+                    x: fechas,
+                    y: datosFiltrados.map(d => d.temperatura),
+                    name: 'Temperatura',
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#FF6B6B', width: 2 },
+                    marker: { size: 4 },
+                    yaxis: 'y'
+                });
+            }
+            
+            // Precipitación (eje Y2)
+            if (data.variables.includes('Precipitacion')) {
+                trazas.push({
+                    x: fechas,
+                    y: datosFiltrados.map(d => d.precipitacion),
+                    name: 'Precipitación',
+                    type: 'bar',
+                    marker: { color: '#4ECDC4' },
+                    yaxis: 'y2'
+                });
+            }
+            
+            // Humedad Relativa (eje Y3)
+            if (data.variables.includes('HR')) {
+                trazas.push({
+                    x: fechas,
+                    y: datosFiltrados.map(d => d.humedad),
+                    name: 'Humedad Relativa',
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#95E1D3', width: 2 },
+                    yaxis: 'y3'
+                });
+            }
+            
+            // Velocidad del Viento (eje Y1 compartido)
+            if (data.variables.includes('Velocidad viento')) {
+                trazas.push({
+                    x: fechas,
+                    y: datosFiltrados.map(d => d.viento),
+                    name: 'Vel. Viento',
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#F38181', width: 1.5, dash: 'dot' },
+                    yaxis: 'y'
+                });
+            }
+            
+            // Radiación (eje Y4)
+            if (data.variables.includes('Radiacion')) {
+                trazas.push({
+                    x: fechas,
+                    y: datosFiltrados.map(d => d.radiacion),
+                    name: 'Radiación',
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#FFA500', width: 1.5 },
+                    yaxis: 'y4'
+                });
+            }
+            
+            // Configuración de la gráfica
+            let layout = {
+                title: `${nombre} - ${municipio}`,
+                xaxis: {
+                    title: 'Fecha',
+                    type: 'date'
+                },
+                yaxis: {
+                    title: 'Temperatura (°C) / Viento (m/s)',
+                    side: 'left',
+                    showgrid: true
+                },
+                yaxis2: {
+                    title: 'Precipitación (mm)',
+                    overlaying: 'y',
+                    side: 'right',
+                    showgrid: false
+                },
+                yaxis3: {
+                    title: 'HR (%)',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 0.85,
+                    showgrid: false
+                },
+                yaxis4: {
+                    title: 'Radiación (W/m²)',
+                    overlaying: 'y',
+                    side: 'left',
+                    position: 0.05,
+                    showgrid: false
+                },
+                hovermode: 'x unified',
+                showlegend: true,
+                legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(255,255,255,0.8)' },
+                margin: { l: 80, r: 80, t: 50, b: 80 }
+            };
+            
+            // Crear modal
+            let modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = 99999;
+            modal.innerHTML = `
+                <div style="background:#fff;padding:20px;border-radius:8px;max-width:95vw;max-height:90vh;overflow:auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                        <h3 style="margin:0;">${nombre} - ${municipio}</h3>
+                        <button id="cerrar-modal-met" style="font-size:18px;padding:4px 12px;cursor:pointer;">✕</button>
+                    </div>
+                    <div id="grafico-meteorologico" style="width:900px;max-width:90vw;height:500px;"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Renderizar gráfica
+            Plotly.newPlot('grafico-meteorologico', trazas, layout, { responsive: true });
+            
+            // Cerrar modal
+            document.getElementById('cerrar-modal-met').onclick = function() {
+                document.body.removeChild(modal);
+            };
+            
+            // Cerrar con click fuera del contenido
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+        });
+}
+
+function descargarDatosMeteorologicos(codigo, nombre, fechaDesde, fechaHasta) {
+    // Cargar índice de archivos para obtener el nombre exacto del archivo
+    fetch('/hidromet_estaciones/index.json')
+        .then(resp => resp.json())
+        .then(index => {
+            // Buscar el archivo correspondiente al código
+            if (!index[codigo]) {
+                throw new Error(`No se encontró archivo para la estación ${codigo}`);
+            }
+            return fetch(`/hidromet_estaciones/${index[codigo]}`);
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al cargar archivo de datos');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            // Filtrar datos por rango de fechas
+            let datosFiltrados = data.datos.filter(d => {
+                let fecha = d.fecha.split(' ')[0];
+                return (!fechaDesde || fecha >= fechaDesde) && (!fechaHasta || fecha <= fechaHasta);
+            });
+            
+            if (datosFiltrados.length === 0) {
+                alert('No hay datos en el rango de fechas seleccionado');
+                return;
+            }
+            
+            // Construir CSV
+            let csv = 'Fecha,Temperatura (°C),Precipitación (mm),Humedad (%),Vel. Viento (m/s),Dir. Viento (°),Radiación (W/m²)\n';
+            datosFiltrados.forEach(d => {
+                csv += `${d.fecha},${d.temperatura || ''},${d.precipitacion || ''},${d.humedad || ''},${d.viento || ''},${d.direccion_viento || ''},${d.radiacion || ''}\n`;
+            });
+            
+            // Descargar archivo
+            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${nombre.replace(/\s+/g, '_')}_${fechaDesde}_${fechaHasta}.csv`;
+            link.click();
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error al descargar datos: ' + err.message);
+        });
+}
+
+// ===== Fin Funciones Estaciones Meteorológicas =====
+
 fetch('indicadoresOH.xlsx')
     .then(response => response.arrayBuffer())
     .then(buffer => {
