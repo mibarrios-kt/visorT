@@ -547,48 +547,64 @@ document.getElementById('chk-est-hidro').addEventListener('change', function(e) 
                     onEachFeature: function(feature, layer) {
                         let props = feature.properties || {};
                         let coords = feature.geometry && feature.geometry.coordinates ? feature.geometry.coordinates : [0,0];
-
-                        // Determinar código/identificador de estación (ajusta según tu geojson)
-                        let stationCode = props['Codigo'] || props['Codigo_estacion'] || props['codigo'] || null;
-                        if (!stationCode) {
-                            // intentar extraer de nombre (ej. "CAFAM" / "0000HCAFAM")
-                            const name = String(props["Nombre_estación"] || props["Nombre"] || '');
-                            const m = name.match(/([0-9A-Z]{4,}H[A-Z0-9]+)/i);
-                            if (m) stationCode = m[1];
-                        }
-
-                        // Popup con botón de datos externos (FTP)
+                        
+                        // Usar OBJECTID_1 como código de la estación
+                        let codigo = props['OBJECTID_1'] || null;
+                        let nombre = props["Nombre_estación"] || props["Nombre"] || 'N/A';
+                        let municipio = props["Municipio"] || 'N/A';
+                        
+                        // Popup con controles de fecha y botones (igual que meteorológicas)
                         let popupContent = `
-                            <b>Nombre:</b> ${props["Nombre_estación"] || props["Nombre"] || 'N/A'}<br>
-                            <b>Municipio:</b> ${props["Municipio"] || 'N/A'}<br>
-                            <b>Tipo:</b> Hidrométrica<br>
-                            <b>Corriente hídrica:</b> ${props["Corriente_hídrica"] || 'N/A'}<br>
-                            <b>Coordenadas:</b> [${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}]<br>
-                            <button class="btn-datos-ftp" data-station="${stationCode || ''}">Ver datos externos</button>
+                            <div style="min-width:280px;">
+                                <b>Nombre:</b> ${nombre}<br>
+                                <b>Municipio:</b> ${municipio}<br>
+                                <b>Tipo:</b> Hidrométrica<br>
+                                <b>Corriente hídrica:</b> ${props["Corriente_hídrica"] || 'N/A'}<br>
+                                <b>Coordenadas:</b> [${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}]
+                                ${codigo ? `
+                                <hr style="margin:10px 0;">
+                                <div style="margin-top:8px;">
+                                    <label style="font-size:12px;display:block;margin-bottom:4px;">Fecha desde:</label>
+                                    <input type="date" id="fecha-desde-${codigo}" style="width:100%;padding:4px;font-size:12px;margin-bottom:6px;">
+                                    <label style="font-size:12px;display:block;margin-bottom:4px;">Fecha hasta:</label>
+                                    <input type="date" id="fecha-hasta-${codigo}" style="width:100%;padding:4px;font-size:12px;margin-bottom:8px;">
+                                    <div style="display:flex;gap:6px;">
+                                        <button id="btn-grafica-${codigo}" style="flex:1;padding:6px;font-size:12px;cursor:pointer;">📊 Ver Gráfica</button>
+                                        <button id="btn-descargar-${codigo}" style="flex:1;padding:6px;font-size:12px;cursor:pointer;">💾 Descargar</button>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
                         `;
-                        layer.bindPopup(popupContent);
-
-                        layer.on('popupopen', function(e) {
-                            const btn = e.popup.getElement().querySelector('.btn-datos-ftp');
-                            if (!btn) return;
-                            btn.onclick = function() {
-                                const code = btn.getAttribute('data-station');
-                                if (!code) {
-                                    alert('No se encontró código de estación. Añade la propiedad "Codigo" en el GeoJSON.');
-                                    return;
-                                }
-                                // Llamar al proxy que conecta al FTP en el servidor
-                                fetch(`http://localhost:3002/ftp-proxy?station=${encodeURIComponent(code)}`)
-                                    .then(r => {
-                                        if (!r.ok) throw new Error('Error proxy FTP');
-                                        return r.json();
-                                    })
-                                    .then(payload => {
-                                        // ...existing code para mostrar modal y gráfica...
-                                    })
-                                    .catch(err => { console.error(err); alert('Error obteniendo datos externos.'); });
-                            };
-                        });
+                        
+                        let popup = L.popup({ maxWidth: 320 }).setContent(popupContent);
+                        layer.bindPopup(popup);
+                        
+                        // Cuando se abre el popup, configurar eventos de botones
+                        if (codigo) {
+                            layer.on('popupopen', function() {
+                                // Configurar fechas por defecto (últimos 30 días)
+                                let hoy = new Date();
+                                let hace30dias = new Date();
+                                hace30dias.setDate(hace30dias.getDate() - 30);
+                                document.getElementById(`fecha-desde-${codigo}`).value = hace30dias.toISOString().split('T')[0];
+                                document.getElementById(`fecha-hasta-${codigo}`).value = hoy.toISOString().split('T')[0];
+                                
+                                // Botón Ver Gráfica
+                                document.getElementById(`btn-grafica-${codigo}`).onclick = function() {
+                                    let fechaDesde = document.getElementById(`fecha-desde-${codigo}`).value;
+                                    let fechaHasta = document.getElementById(`fecha-hasta-${codigo}`).value;
+                                    mostrarGraficaHidrometrica(codigo, nombre, municipio, fechaDesde, fechaHasta);
+                                };
+                                
+                                // Botón Descargar
+                                document.getElementById(`btn-descargar-${codigo}`).onclick = function() {
+                                    let fechaDesde = document.getElementById(`fecha-desde-${codigo}`).value;
+                                    let fechaHasta = document.getElementById(`fecha-hasta-${codigo}`).value;
+                                    descargarDatosHidrometricos(codigo, nombre, fechaDesde, fechaHasta);
+                                };
+                            });
+                        }
                     }
                 }).addTo(map);
             })
@@ -1157,6 +1173,170 @@ function descargarDatosMeteorologicos(codigo, nombre, fechaDesde, fechaHasta) {
 }
 
 // ===== Fin Funciones Estaciones Meteorológicas =====
+
+// ===== Funciones para Estaciones Hidrométricas CORTOLIMA =====
+
+function mostrarGraficaHidrometrica(codigo, nombre, municipio, fechaDesde, fechaHasta) {
+    // Cargar índice de archivos para obtener el nombre exacto del archivo
+    fetch('/hidromet_estaciones/index.json')
+        .then(resp => resp.json())
+        .then(index => {
+            // Buscar el archivo correspondiente al código
+            if (!index[codigo]) {
+                throw new Error(`No se encontró archivo para la estación ${codigo}`);
+            }
+            return fetch(`/hidromet_estaciones/${index[codigo]}`);
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al cargar archivo de datos');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            // Filtrar datos por rango de fechas
+            let datosFiltrados = data.datos.filter(d => {
+                let fecha = d.fecha.split(' ')[0]; // Tomar solo la parte de fecha (YYYY-MM-DD)
+                return (!fechaDesde || fecha >= fechaDesde) && (!fechaHasta || fecha <= fechaHasta);
+            });
+            
+            if (datosFiltrados.length === 0) {
+                alert('No hay datos en el rango de fechas seleccionado');
+                return;
+            }
+            
+            // Preparar datos para Plotly
+            let fechas = datosFiltrados.map(d => d.fecha);
+            let niveles = datosFiltrados.map(d => d.nivel);
+            
+            // Traza del nivel del agua
+            let traza = {
+                x: fechas,
+                y: niveles,
+                name: 'Nivel del agua',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#1E90FF', width: 2 },
+                marker: { size: 4, color: '#1E90FF' },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(30, 144, 255, 0.2)'
+            };
+            
+            // Configuración de la gráfica
+            let layout = {
+                title: `${nombre} - ${municipio}<br><sub>Corriente: ${data.corriente_hidrica || 'N/A'}</sub>`,
+                xaxis: {
+                    title: 'Fecha',
+                    type: 'date'
+                },
+                yaxis: {
+                    title: 'Nivel del agua (m)',
+                    showgrid: true,
+                    rangemode: 'tozero'
+                },
+                hovermode: 'x unified',
+                showlegend: true,
+                legend: { x: 0.01, y: 0.99, bgcolor: 'rgba(255,255,255,0.8)' },
+                margin: { l: 80, r: 40, t: 80, b: 80 }
+            };
+            
+            // Crear modal
+            let modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = 99999;
+            modal.innerHTML = `
+                <div style="background:#fff;padding:20px;border-radius:8px;max-width:95vw;max-height:90vh;overflow:auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                        <h3 style="margin:0;">${nombre} - ${municipio}</h3>
+                        <button id="cerrar-modal-hidro" style="font-size:18px;padding:4px 12px;cursor:pointer;">✕</button>
+                    </div>
+                    <div id="grafico-hidrometrico" style="width:900px;max-width:90vw;height:500px;"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Renderizar gráfica
+            Plotly.newPlot('grafico-hidrometrico', [traza], layout, { responsive: true });
+            
+            // Cerrar modal
+            document.getElementById('cerrar-modal-hidro').onclick = function() {
+                document.body.removeChild(modal);
+            };
+            
+            // Cerrar con click fuera del contenido
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error al cargar datos: ' + err.message);
+        });
+}
+
+function descargarDatosHidrometricos(codigo, nombre, fechaDesde, fechaHasta) {
+    // Cargar índice de archivos para obtener el nombre exacto del archivo
+    fetch('/hidromet_estaciones/index.json')
+        .then(resp => resp.json())
+        .then(index => {
+            // Buscar el archivo correspondiente al código
+            if (!index[codigo]) {
+                throw new Error(`No se encontró archivo para la estación ${codigo}`);
+            }
+            return fetch(`/hidromet_estaciones/${index[codigo]}`);
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('Error al cargar archivo de datos');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            // Filtrar datos por rango de fechas
+            let datosFiltrados = data.datos.filter(d => {
+                let fecha = d.fecha.split(' ')[0];
+                return (!fechaDesde || fecha >= fechaDesde) && (!fechaHasta || fecha <= fechaHasta);
+            });
+            
+            if (datosFiltrados.length === 0) {
+                alert('No hay datos en el rango de fechas seleccionado');
+                return;
+            }
+            
+            // Construir CSV
+            let csv = 'Fecha,Nivel (m)\n';
+            datosFiltrados.forEach(d => {
+                csv += `${d.fecha},${d.nivel || ''}\n`;
+            });
+            
+            // Descargar archivo
+            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${nombre.replace(/\s+/g, '_')}_${fechaDesde}_${fechaHasta}.csv`;
+            link.click();
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error al descargar datos: ' + err.message);
+        });
+}
+
+// ===== Fin Funciones Estaciones Hidrométricas =====
 
 fetch('indicadoresOH.xlsx')
     .then(response => response.arrayBuffer())
